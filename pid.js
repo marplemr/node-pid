@@ -9,13 +9,9 @@ var ctr = new Controller({
   k_d: 0.01,
   dt: 1
 });
-var setTarget = 80
+var setTarget = 100
 var thermistorOn
 ctr.setTarget(setTarget);
-gpio.on('change', function(channel, value) {
-    console.log('Channel ' + channel + ' value is now ' + value);
-    thermistorOn = value
-})
 
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
@@ -61,6 +57,7 @@ function perfectTemp () {
           gpio.write(18, true, function(err) {
             if (err) throw err;
             console.log('---- heater-SWITCHED-ON! ----');
+            thermistorOn = true
             return setTimeout(function() {
               perfectTemp()
             }, 1000)
@@ -77,6 +74,7 @@ function perfectTemp () {
           gpio.write(18, false, function(err) {
             if (err) throw err;
             console.log('---- heater-SWITCHED-OFF! ----');
+            thermistorOn = false
             return setTimeout(function() {
               perfectTemp()
             }, 1000)
