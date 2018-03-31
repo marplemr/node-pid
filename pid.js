@@ -95,6 +95,7 @@ function perfectTemp () {
     // callback();
   });
 }
+console.log('thermistorOn', thermistorOn)
 perfectTemp()
 
 
