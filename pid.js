@@ -49,21 +49,19 @@ function perfectTemp () {
       }, 1000)
     }
     if (correction > 0) {
-      gpio.setup(24, gpio.DIR_OUT, write)
-      gpio.write(24, true, function(err) {
+      gpio.setup(24, gpio.DIR_OUT, gpio.write(24, true, function(err) {
         if (err) throw err;
         console.log('heater-ON!');
-      });
+      });)
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
     }
     if (correction < 0) {
-      gpio.setup(24, gpio.DIR_OUT, write)
-      gpio.write(24, false, function(err) {
+      gpio.setup(24, gpio.DIR_OUT, gpio.write(24, false, function(err) {
         if (err) throw err;
         console.log('heater-OFF!');
-      });
+      });)
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
