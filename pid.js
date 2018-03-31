@@ -1,5 +1,7 @@
 var Controller = require('node-pid-controller');
 var ads1x15 = require('node-ads1x15');
+var gpio = require('rpi-gpio');
+
 var chip = 1; //0 for ads1015, 1 for ads1115
 var ctr = new Controller({
   k_p: 0.25,
@@ -47,13 +49,21 @@ function perfectTemp () {
       }, 1000)
     }
     if (correction > 0) {
-      console.log('heater-on!')
+      gpio.setup(24, gpio.DIR_OUT, write)
+      gpio.write(24, true, function(err) {
+        if (err) throw err;
+        console.log('heater-ON!');
+      });
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
     }
     if (correction < 0) {
-      console.log('cooler-on!')
+      gpio.setup(24, gpio.DIR_OUT, write)
+      gpio.write(24, false, function(err) {
+        if (err) throw err;
+        console.log('heater-OFF!');
+      });
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
