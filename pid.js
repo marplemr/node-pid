@@ -10,7 +10,18 @@ var ctr = new Controller({
   dt: 1
 });
 var setTarget = 80
+var thermistorOn
 ctr.setTarget(setTarget);
+gpio.on('change', function(channel, value) {
+    // console.log('Channel ' + channel + ' value is now ' + value);
+    thermistorOn = value
+})
+gpio.setup(18, gpio.DIR_IN, function () {
+  gpio.read(18, function(err, value) {
+    if (err) throw err;
+    thermistorOn = value
+  })
+})
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
@@ -49,11 +60,13 @@ function perfectTemp () {
       }, 1000)
     }
     if (correction > 0) {
-      gpio.setup(24, gpio.DIR_OUT, function () {
-        gpio.write(24, true, function(err) {
-          if (err) throw err;
-          console.log('heater-ON!');
-        })
+      if (!thermistorOn) {
+        gpio.setup(18, gpio.DIR_OUT, function () {
+          gpio.write(18, true, function(err) {
+            if (err) throw err;
+            console.log('heater-ON!');
+          })
+      }
       })
 
       return setTimeout(function() {
@@ -61,12 +74,14 @@ function perfectTemp () {
       }, 1000)
     }
     if (correction < 0) {
-      gpio.setup(24, gpio.DIR_OUT, function () {
-        gpio.write(24, false, function(err) {
-          if (err) throw err;
-          console.log('heater-OFF!');
+      if (thermistorOn) {
+        gpio.setup(18, gpio.DIR_OUT, function () {
+          gpio.write(18, false, function(err) {
+            if (err) throw err;
+            console.log('heater-OFF!');
+          })
         })
-      })
+      }
 
       return setTimeout(function() {
         perfectTemp()
