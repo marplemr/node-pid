@@ -66,7 +66,7 @@ function perfectTemp () {
             if (err) throw err;
             console.log('heater-ON!');
           })
-      }
+      })
       })
 
       return setTimeout(function() {
