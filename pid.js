@@ -1,7 +1,7 @@
-let Controller = require('node-pid-controller');
+var Controller = require('node-pid-controller');
 var ads1x15 = require('node-ads1x15');
 var chip = 1; //0 for ads1015, 1 for ads1115
-let ctr = new Controller({
+var ctr = new Controller({
   k_p: 0.25,
   k_i: 0.01,
   k_d: 0.01,
@@ -16,9 +16,8 @@ var progGainAmp = '4096'; // see index.js for allowed values for your chip
 
 // var ChData =[]; //somewhere to store our reading
 // var dev = 127; // used to change Ch data to Voltage
-let goalReached = false
-while (!goalReached) {
-  if (adc.busy) continue;
+var goalReached = false
+function perfectTemp () {
   adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
     if(err){
       //logging / troubleshooting code goes here...
@@ -30,12 +29,20 @@ while (!goalReached) {
     console.log(mv + 'mv' + ' ' + correction + ' pid')
     // applyInputToActuator(input);
     goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
+    if (goalReached) {
+      console.log('perfectTemp!')
+      return perfectTemp()
+    }
+    console.log('temp-needs-work!')
+    return perfectTemp()
     //console.log ('channel  ' + ch + ': ' + data);
     // Calling the next ch or done
     // callback();
   });
-
 }
+
+
+
 // Reading the ch data
 // var ReadCh = function(ch, callback){
 //   adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
