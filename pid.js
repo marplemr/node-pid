@@ -13,7 +13,7 @@ var setTarget = 80
 var thermistorOn
 ctr.setTarget(setTarget);
 gpio.on('change', function(channel, value) {
-    // console.log('Channel ' + channel + ' value is now ' + value);
+    console.log('Channel ' + channel + ' value is now ' + value);
     thermistorOn = value
 })
 
