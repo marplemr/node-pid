@@ -16,12 +16,12 @@ gpio.on('change', function(channel, value) {
     // console.log('Channel ' + channel + ' value is now ' + value);
     thermistorOn = value
 })
-gpio.setup(18, gpio.DIR_IN, function () {
-  gpio.read(18, function(err, value) {
-    if (err) throw err;
-    thermistorOn = value
-  })
-})
+// gpio.setup(18, gpio.DIR_IN, function () {
+//   gpio.read(18, function(err, value) {
+//     if (err) throw err;
+//     thermistorOn = value
+//   })
+// })
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
