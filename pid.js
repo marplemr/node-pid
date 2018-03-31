@@ -1,7 +1,14 @@
 var Controller = require('node-pid-controller');
 var ads1x15 = require('node-ads1x15');
 var gpio = require('rpi-gpio');
-
+process.on('SIGINT', function() {
+  console.log("Caught interrupt signal");
+  console.log("closing all gpios");
+    gpio.destroy(function () {
+      if (i_should_exit)
+          process.exit();
+    })
+});
 var chip = 1; //0 for ads1015, 1 for ads1115
 var ctr = new Controller({
   k_p: 0.25,
