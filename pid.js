@@ -66,7 +66,9 @@ function perfectTemp () {
           })
         })
       }
-      return  perfectTemp()
+      return setTimeout(function() {
+        perfectTemp()
+      }, 1000)
     }
     if (correction < 0) {
       if (thermistorOn) {
@@ -80,7 +82,9 @@ function perfectTemp () {
           })
         })
       }
-      return perfectTemp()
+      return setTimeout(function() {
+        perfectTemp()
+      }, 1000)
     }
 
 
