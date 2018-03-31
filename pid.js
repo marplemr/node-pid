@@ -66,6 +66,7 @@ function perfectTemp () {
           })
         })
       }
+      return  perfectTemp()
     }
     if (correction < 0) {
       if (thermistorOn) {
@@ -79,6 +80,7 @@ function perfectTemp () {
           })
         })
       }
+      return perfectTemp()
     }
 
 
