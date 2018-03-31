@@ -33,7 +33,7 @@ function perfectTemp () {
     var mv = data // Putting data into
     var temp = mvToC(mv).temp
     var correction  = ctr.update(temp);
-    console.log('Temp: ' temp + ' C')
+    console.log('Temp: ' + temp + ' C')
     console.log('Correction: ', correction)
     console.log('')
     // applyInputToActuator(input);
