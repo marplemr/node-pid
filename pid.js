@@ -7,7 +7,8 @@ var ctr = new Controller({
   k_d: 0.01,
   dt: 1
 });
-ctr.setTarget(80);
+var setTarget = 80
+ctr.setTarget(setTarget);
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
@@ -34,6 +35,7 @@ function perfectTemp () {
     var temp = mvToC(mv).temp
     var correction  = ctr.update(temp);
     console.log('')
+    console.log('Setpoint: ', setTarget + ' C')
     console.log('Temp: ' + temp + ' C')
     console.log('Correction: ', correction)
     // applyInputToActuator(input);
@@ -45,13 +47,13 @@ function perfectTemp () {
       }, 1000)
     }
     if (correction > 0) {
-      console.log('cooler-on!')
+      console.log('heater-on!')
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
     }
     if (correction < 0) {
-      console.log('heater-on!')
+      console.log('cooler-on!')
       return setTimeout(function() {
         perfectTemp()
       }, 1000)
