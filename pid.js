@@ -44,7 +44,7 @@ function perfectTemp () {
     // callback();
   });
 }
-
+perfectTemp()
 
 
 // Reading the ch data
