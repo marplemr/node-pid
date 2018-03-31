@@ -33,6 +33,7 @@ function mvToC (mV) {
 // var dev = 127; // used to change Ch data to Voltage
 var goalReached = false
 function perfectTemp () {
+  console.log('heater:', ' ', thermistorOn ? 'ON' : 'OFF');
   adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, data) {
     if(err){
       //logging / troubleshooting code goes here...
@@ -59,7 +60,7 @@ function perfectTemp () {
         return gpio.setup(18, gpio.DIR_OUT, function () {
           gpio.write(18, true, function(err) {
             if (err) throw err;
-            console.log('heater-ON!');
+            console.log('---- heater-SWITCHED-ON! ----');
             return setTimeout(function() {
               perfectTemp()
             }, 1000)
@@ -75,7 +76,7 @@ function perfectTemp () {
         return gpio.setup(18, gpio.DIR_OUT, function () {
           gpio.write(18, false, function(err) {
             if (err) throw err;
-            console.log('heater-OFF!');
+            console.log('---- heater-SWITCHED-OFF! ----');
             return setTimeout(function() {
               perfectTemp()
             }, 1000)
