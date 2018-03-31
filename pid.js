@@ -18,7 +18,7 @@ var progGainAmp = '4096'; // see index.js for allowed values for your chip
 // var dev = 127; // used to change Ch data to Voltage
 var goalReached = false
 function perfectTemp () {
-  adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
+  adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, data) {
     if(err){
       //logging / troubleshooting code goes here...
       throw err;
@@ -31,10 +31,14 @@ function perfectTemp () {
     goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
     if (goalReached) {
       console.log('perfectTemp!')
-      return perfectTemp()
+      return setTimeout(function() {
+        perfectTemp()
+      }, 1000)
     }
     console.log('temp-needs-work!')
-    return perfectTemp()
+    return setTimeout(function() {
+      perfectTemp()
+    }, 1000)
     //console.log ('channel  ' + ch + ': ' + data);
     // Calling the next ch or done
     // callback();
