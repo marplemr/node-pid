@@ -33,7 +33,9 @@ function perfectTemp () {
     var mv = data // Putting data into
     var temp = mvToC(mv).temp
     var correction  = ctr.update(temp);
-    console.log(mv + 'mv' + ' ' + correction + ' pid')
+    console.log('Temp: ' temp + ' C')
+    console.log('Correction: ', correction)
+    console.log('')
     // applyInputToActuator(input);
     goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
     if (goalReached) {
@@ -42,10 +44,20 @@ function perfectTemp () {
         perfectTemp()
       }, 1000)
     }
-    console.log('temp-needs-work!')
-    return setTimeout(function() {
-      perfectTemp()
-    }, 1000)
+    if (goalReached > 0) {
+      console.log('cooler-on!')
+      return setTimeout(function() {
+        perfectTemp()
+      }, 1000)
+    }
+    if (goalReached < 0) {
+      console.log('heater-on!')
+      return setTimeout(function() {
+        perfectTemp()
+      }, 1000)
+    }
+
+
     //console.log ('channel  ' + ch + ': ' + data);
     // Calling the next ch or done
     // callback();
