@@ -54,39 +54,31 @@ function perfectTemp () {
         perfectTemp()
       }, 1000)
     }
-    gpio.setup(18, gpio.DIR_IN, function () {
-      gpio.read(18, function(err, value) {
-        if (err) throw err;
-        thermistorOn = value
-      })
-    })
     if (correction > 0) {
       if (!thermistorOn) {
-        gpio.setup(18, gpio.DIR_OUT, function () {
+        return gpio.setup(18, gpio.DIR_OUT, function () {
           gpio.write(18, true, function(err) {
             if (err) throw err;
             console.log('heater-ON!');
+            return setTimeout(function() {
+              perfectTemp()
+            }, 1000)
           })
         })
       }
-
-      return setTimeout(function() {
-        perfectTemp()
-      }, 1000)
     }
     if (correction < 0) {
       if (thermistorOn) {
-        gpio.setup(18, gpio.DIR_OUT, function () {
+        return gpio.setup(18, gpio.DIR_OUT, function () {
           gpio.write(18, false, function(err) {
             if (err) throw err;
             console.log('heater-OFF!');
+            return setTimeout(function() {
+              perfectTemp()
+            }, 1000)
           })
         })
       }
-
-      return setTimeout(function() {
-        perfectTemp()
-      }, 1000)
     }
 
 
@@ -95,9 +87,16 @@ function perfectTemp () {
     // callback();
   });
 }
-console.log('thermistorOn', thermistorOn)
-perfectTemp()
-
+gpio.setup(18, gpio.DIR_IN, function () {
+  gpio.read(18, function(err, value) {
+    if (err) throw err;
+    console.log('heater on/off ?');
+    console.log(value ? 'ON' : 'OFF')
+    return setTimeout(function() {
+      perfectTemp()
+    }, 1000)
+  })
+})
 
 // Reading the ch data
 // var ReadCh = function(ch, callback){
