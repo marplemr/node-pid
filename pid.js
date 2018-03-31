@@ -7,13 +7,19 @@ var ctr = new Controller({
   k_d: 0.01,
   dt: 1
 });
-ctr.setTarget(120);
+ctr.setTarget(80);
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
 var samplesPerSecond = '250'; // see index.js for allowed values for your chip
 var progGainAmp = '4096'; // see index.js for allowed values for your chip
 
+function mvToC (mV) {
+  var thermistorOhms = 3300/(mV/1000) - 1000
+  var celsius = (thermistorOhms/604 - 1)/0.00518
+  var far = celsius * (9/5) + 32
+  return {temp: far, res: thermistorOhms}
+}
 // var ChData =[]; //somewhere to store our reading
 // var dev = 127; // used to change Ch data to Voltage
 var goalReached = false
@@ -24,8 +30,9 @@ function perfectTemp () {
       throw err;
     }
     // if you made it here, then the data object contains your reading!
-    const mv = data // Putting data into
-    const correction  = ctr.update(mv);
+    var mv = data // Putting data into
+    var temp = mvToC(mv).temp
+    var correction  = ctr.update(temp);
     console.log(mv + 'mv' + ' ' + correction + ' pid')
     // applyInputToActuator(input);
     goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'

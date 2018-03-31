@@ -10,7 +10,12 @@ var progGainAmp = '4096'; // see index.js for allowed values for your chip
 
 var ChData =[]; //somewhere to store our reading
 var dev = 127; // used to change Ch data to Voltage
-
+function mvToC (mV) {
+  var thermistorOhms = 3300/(mV/1000) - 1000
+  var celsius = (thermistorOhms/604 - 1)/0.00518
+  var far = celsius * (9/5) + 32
+  return {temp: far, res: thermistorOhms}
+}
 // Reading the ch data
 var ReadCh = function(ch, callback){
   adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
