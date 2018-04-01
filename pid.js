@@ -15,7 +15,7 @@ var ctr = new Controller({
   k_d: 0.01,
   dt: 1
 });
-var setTarget = 100
+var setTarget = 180
 var thermistorOn
 ctr.setTarget(setTarget);
 
