@@ -5,7 +5,6 @@ process.on('SIGINT', function() {
   console.log("Caught interrupt signal");
   console.log("closing all gpios");
     gpio.destroy(function () {
-      if (i_should_exit)
           process.exit();
     })
 });
@@ -47,8 +46,8 @@ function perfectTemp () {
     var mv = data // Putting data into
     var temp = mvToC(mv).temp
     var correction  = ctr.update(temp);
-    console.log('Setpoint: ', setTarget + ' C')
-    console.log('Temp: ' + temp + ' C')
+    console.log('Setpoint: ', setTarget + ' F')
+    console.log('Temp: ' + temp + ' F')
     console.log('Correction: ', correction)
     // applyInputToActuator(input);
     goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
@@ -61,7 +60,7 @@ function perfectTemp () {
     if (correction > 0) {
       if (!thermistorOn) {
         return gpio.setup(18, gpio.DIR_OUT, function () {
-          gpio.write(18, true, function(err) {
+          gpio.write(18, false, function(err) {
             if (err) throw err;
             console.log('---- heater-SWITCHED-ON! ----');
             thermistorOn = true
@@ -78,7 +77,7 @@ function perfectTemp () {
     if (correction < 0) {
       if (thermistorOn) {
         return gpio.setup(18, gpio.DIR_OUT, function () {
-          gpio.write(18, false, function(err) {
+          gpio.write(18, true, function(err) {
             if (err) throw err;
             console.log('---- heater-SWITCHED-OFF! ----');
             thermistorOn = false
