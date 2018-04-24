@@ -25,10 +25,12 @@ var channel = 0; //channel 0, 1, 2, or 3...
 var samplesPerSecond = '250'; // see index.js for allowed values for your chip
 var progGainAmp = '4096'; // see index.js for allowed values for your chip
 
-function mvToC (mV) {
-  var thermistorOhms = 3300/(mV/1000) - 1000
-  var celsius = (thermistorOhms/604 - 1)/0.00518
-  var far = celsius * (9/5) + 32
+function mvToC (mVCh1, mVCh2) {
+  // var thermistorOhms = 3300/(mV/1000) - 1000
+  var thermistorOhms = 221 * (1 / ((mVCh1 / mvCh2) - 1)) - 1.4
+  // var celsius = (thermistorOhms/604 - 1)/0.00518
+  var celsius = (thermistorOhms / 100 - 1) / 0.00385
+  var far = celsius * (9 / 5) + 32
   return {temp: far, res: thermistorOhms}
 }
 // var ChData =[]; //somewhere to store our reading
@@ -37,67 +39,69 @@ var goalReached = false
 function perfectTemp () {
   console.log('')
   console.log('heater:', ' ', thermistorOn ? 'ON' : 'OFF');
-  adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, data) {
+  adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
     if(err){
       //logging / troubleshooting code goes here...
       throw err;
     }
-    // if you made it here, then the data object contains your reading!
-    var mv = data // Putting data into
-    var temp = mvToC(mv).temp
-    var correction  = ctr.update(temp);
-    console.log('Setpoint: ', setTarget + ' F')
-    console.log('Temp: ' + temp + ' F')
-    console.log('Correction: ', correction)
-    // applyInputToActuator(input);
-    goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
-    if (goalReached) {
-      console.log('perfectTemp!')
-      return setTimeout(function() {
-        perfectTemp()
-      }, 1000)
-    }
-    if (correction > 0) {
-      if (!thermistorOn) {
-        return gpio.setup(18, gpio.DIR_OUT, function () {
-          gpio.write(18, false, function(err) {
-            if (err) throw err;
-            console.log('---- heater-SWITCHED-ON! ----');
-            thermistorOn = true
-            return setTimeout(function() {
-              perfectTemp()
-            }, 1000)
-          })
-        })
+    adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
+      // if you made it here, then the data object contains your reading!
+      var mvCh1 = dataCh1 // Putting data into
+      var mvCh2 = dataCh2
+      var temp = mvToC(mvCh1, mvCh2).temp
+      var correction  = ctr.update(temp);
+      console.log('Setpoint: ', setTarget + ' F')
+      console.log('Temp: ' + temp + ' F')
+      console.log('Correction: ', correction)
+      // applyInputToActuator(input);
+      goalReached = (correction === 0) ? true : false; // in the case of continuous control, you let this variable 'false'
+      if (goalReached) {
+        console.log('perfectTemp!')
+        return setTimeout(function() {
+          perfectTemp()
+        }, 1000)
       }
-      return setTimeout(function() {
-        perfectTemp()
-      }, 1000)
-    }
-    if (correction < 0) {
-      if (thermistorOn) {
-        return gpio.setup(18, gpio.DIR_OUT, function () {
-          gpio.write(18, true, function(err) {
-            if (err) throw err;
-            console.log('---- heater-SWITCHED-OFF! ----');
-            thermistorOn = false
-            return setTimeout(function() {
-              perfectTemp()
-            }, 1000)
+      if (correction > 0) {
+        if (!thermistorOn) {
+          return gpio.setup(18, gpio.DIR_OUT, function () {
+            gpio.write(18, false, function(err) {
+              if (err) throw err;
+              console.log('---- heater-SWITCHED-ON! ----');
+              thermistorOn = true
+              return setTimeout(function() {
+                perfectTemp()
+              }, 1000)
+            })
           })
-        })
+        }
+        return setTimeout(function() {
+          perfectTemp()
+        }, 1000)
       }
-      return setTimeout(function() {
-        perfectTemp()
-      }, 1000)
-    }
-
-
-    //console.log ('channel  ' + ch + ': ' + data);
-    // Calling the next ch or done
-    // callback();
-  });
+      if (correction < 0) {
+        if (thermistorOn) {
+          return gpio.setup(18, gpio.DIR_OUT, function () {
+            gpio.write(18, true, function(err) {
+              if (err) throw err;
+              console.log('---- heater-SWITCHED-OFF! ----');
+              thermistorOn = false
+              return setTimeout(function() {
+                perfectTemp()
+              }, 1000)
+            })
+          })
+        }
+        return setTimeout(function() {
+          perfectTemp()
+        }, 1000)
+      }
+      //console.log ('channel  ' + ch + ': ' + data);
+      // Calling the next ch or done
+      // callback();
+    });
+  })
 }
+
 gpio.setup(18, gpio.DIR_IN, function () {
   gpio.read(18, function(err, value) {
     if (err) throw err;
