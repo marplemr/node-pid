@@ -27,7 +27,7 @@ var progGainAmp = '4096'; // see index.js for allowed values for your chip
 
 function mvToC (mVCh1, mVCh2) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
-  var thermistorOhms = 221 * (1 / ((mVCh1 / mvCh2) - 1)) - 1.4
+  var thermistorOhms = 221 * (1 / ((mVCh1 / mVCh2) - 1)) - 1.4
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   var celsius = (thermistorOhms / 100 - 1) / 0.00385
   var far = celsius * (9 / 5) + 32
