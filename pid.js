@@ -24,7 +24,7 @@ var ctrBot = new Controller({
 var setTarget = 180
 var interval = 500
 var botPlateGPIO = 18
-var topPlateGPIO = 99
+var topPlateGPIO = 22
 var thermistorBotOn
 var thermistorTopOn
 ctrTop.setTarget(setTarget)
@@ -77,7 +77,7 @@ function perfectTemp () {
           var mvCh3 = dataCh3
           var mvCh4 = dataCh4
           var tempBotPlate = mvToC(mvCh1, mvCh2, 221, 1.4).temp
-          var tempTopPlate = mvToC(mvCh3, mvCh4, 235, 4).temp
+          var tempTopPlate = mvToC(mvCh3, mvCh4, 235, 13.4).temp
           var correctionTop  = ctrTop.update(tempTopPlate)
           var correctionBot  = ctrBot.update(tempBotPlate)
           console.log('Setpoint: ', setTarget + ' F')
@@ -129,6 +129,7 @@ function perfectTemp () {
           }
 
           shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
+          shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
           return setTimeout(function() {
             perfectTemp()
           }, interval)
@@ -139,14 +140,20 @@ function perfectTemp () {
 }
 
 gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
-  gpio.read(botPlateGPIO, function(err, value) {
+  gpio.read(botPlateGPIO, function(err, valueBot) {
     if (err) throw err;
-    console.log('')
-    console.log('heater on/off ?');
-    console.log(value ? 'ON' : 'OFF')
-    return setTimeout(function() {
-      perfectTemp()
-    }, interval)
+    gpio.setup(topPlateGPIO, gpio.DIR_IN, function () {
+      gpio.read(topPlateGPIO, function(err, valueTop) {
+        if (err) throw err;
+        console.log('')
+        console.log('heater on/off ?');
+        console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
+        console.log(valueTop ? 'Top-ON' : 'Top-OFF')
+        return setTimeout(function() {
+          perfectTemp()
+        }, interval)
+      })
+    })
   })
 })
 
