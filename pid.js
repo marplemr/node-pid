@@ -23,8 +23,8 @@ var ctrBot = new Controller({
 })
 var setTarget = 180
 var interval = 500
-var topPlateGPIO = 18
-var botPlateGPIO = 99
+var botPlateGPIO = 18
+var topPlateGPIO = 99
 var thermistorBotOn
 var thermistorTopOn
 ctrTop.setTarget(setTarget)
@@ -88,7 +88,7 @@ function perfectTemp () {
           console.log('Correction: ', correctionBot)
           console.log('------------')
           // applyInputToActuator(input);
-          function shouldISwitch (plate, gpioNum, correction) {
+          function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
             var goalReached = plate === 'top' ? goalReachedTop : goalReachedBot
 
             if (goalReached) {
@@ -128,7 +128,7 @@ function perfectTemp () {
             }
           }
 
-          shouldISwitch('bottom', topPlateGPIO, correctionBottom)
+          shouldISwitch('bottom', topPlateGPIO, correctionBot, thermistorBotOn)
           return setTimeout(function() {
             perfectTemp()
           }, interval)
