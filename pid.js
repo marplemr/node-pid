@@ -36,9 +36,9 @@ var channel = 0; //channel 0, 1, 2, or 3...
 var samplesPerSecond = '250'; // see index.js for allowed values for your chip
 var progGainAmp = '512'; // see index.js for allowed values for your chip
 
-function mvToC (mVCh1, mVCh2) {
+function mvToC (mVCh1, mVCh2, ohmRef) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
-  var thermistorOhms = 221 * (1 / ((mVCh1 / mVCh2) - 1)) - 1.4
+  var thermistorOhms = ohmRef * (1 / ((mVCh1 / mVCh2) - 1)) - 1.4
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   var celsius = (thermistorOhms / 100 - 1) / 0.00385
   var far = celsius * (9 / 5) + 32
@@ -76,8 +76,8 @@ function perfectTemp () {
           var mvCh2 = dataCh2
           var mvCh3 = dataCh3
           var mvCh4 = dataCh4
-          var tempBotPlate = mvToC(mvCh1, mvCh2).temp
-          var tempTopPlate = mvToC(mvCh3, mvCh4).temp
+          var tempBotPlate = mvToC(mvCh1, mvCh2, 221).temp
+          var tempTopPlate = mvToC(mvCh3, mvCh4, 235).temp
           var correctionTop  = ctrTop.update(tempTopPlate)
           var correctionBot  = ctrBot.update(tempBotPlate)
           console.log('Setpoint: ', setTarget + ' F')
