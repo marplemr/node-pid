@@ -47,6 +47,7 @@ function mvToC (mVCh1, mVCh2, ohmRef, offset) {
 // var ChData =[]; //somewhere to store our reading
 // var dev = 127; // used to change Ch data to Voltage
 var goalReachedBot = false
+var goalReachedTop = false
 function perfectTemp () {
   console.log('')
   console.log('heaterTop:', ' ', thermistorTopOn ? 'ON' : 'OFF')
