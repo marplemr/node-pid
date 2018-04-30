@@ -85,7 +85,7 @@ function perfectTemp () {
           console.log('Correction: ', correctionTop)
           console.log('------------')
           console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
-          console.log('Correction: ', correctionBottom)
+          console.log('Correction: ', correctionBot)
           console.log('------------')
           // applyInputToActuator(input);
           function shouldISwitch (plate, gpioNum, correction) {
