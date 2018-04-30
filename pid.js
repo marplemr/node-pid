@@ -76,8 +76,8 @@ function perfectTemp () {
           var mvCh2 = dataCh2
           var mvCh3 = dataCh3
           var mvCh4 = dataCh4
-          var tempTopPlate = mvToC(mvCh1, mvCh2).temp
-          var tempBotPlate = mvToC(mvCh3, mvCh4).temp
+          var tempBotPlate = mvToC(mvCh1, mvCh2).temp
+          var tempTopPlate = mvToC(mvCh3, mvCh4).temp
           var correctionTop  = ctrTop.update(tempTopPlate)
           var correctionBot  = ctrBot.update(tempBotPlate)
           console.log('Setpoint: ', setTarget + ' F')
