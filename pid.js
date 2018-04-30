@@ -128,7 +128,7 @@ function perfectTemp () {
             }
           }
 
-          shouldISwitch('bottom', topPlateGPIO, correctionBot, thermistorBotOn)
+          shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
           return setTimeout(function() {
             perfectTemp()
           }, interval)
