@@ -138,8 +138,8 @@ function perfectTemp () {
   })
 }
 
-gpio.setup(topPlateGPIO, gpio.DIR_IN, function () {
-  gpio.read(topPlateGPIO, function(err, value) {
+gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
+  gpio.read(botPlateGPIO, function(err, value) {
     if (err) throw err;
     console.log('')
     console.log('heater on/off ?');
