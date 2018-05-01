@@ -147,6 +147,7 @@ var ChDone = function(){
     shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
     shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
     ChData = ChDataOriginal
+    console.log('ch1Data', ChData)
     count = 0
   }
 };
