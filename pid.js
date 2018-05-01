@@ -87,6 +87,12 @@ function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
 }
 
 count = 0
+var ChDataOriginal = {
+  0: [],
+  1: [],
+  2: [],
+  3: [],
+}
 var ChData = {
   0: [],
   1: [],
@@ -140,7 +146,7 @@ var ChDone = function(){
     console.log('')
     shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
     shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-
+    ChData = ChDataOriginal
     count = 0
   }
 };
