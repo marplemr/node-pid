@@ -146,7 +146,7 @@ var ChDone = function(){
     console.log('')
     shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
     shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-    ChData = ChDataOriginal
+    ChData = Object.assign({}, ChDataOriginal)
     console.log('ch1Data', ChData)
     count = 0
   }
