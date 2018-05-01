@@ -212,7 +212,12 @@ function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
 
 
 count = 0
-var ChData = {}
+var ChData = {
+  1: [],
+  2: [],
+  3: [],
+  4: []
+}
 // Reading the ch data
 var ReadCh = function(ch, callback){
   adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
