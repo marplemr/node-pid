@@ -96,7 +96,7 @@ function perfectTemp (sampleSize) {
     ch3: [],
     ch4: []
   }
-  readall(sampleSize)
+  readAll(sampleSize)
     .then(res => {
       // done with averaging
       var averages = Object.assign({}, data)
@@ -163,7 +163,20 @@ function perfectTemp (sampleSize) {
       })
     })
     if (count - avgSample < 0) {
-      return readAll(5)
+      if (!adc.busy) {
+        count++
+        return readAll(avgSample)
+      }
+      function retry () {
+        return setTimeout(function () {
+          if (!adc.busy) {
+            count++
+            return readAll(avgSample)
+          }
+          return retry()
+        }, 5)
+      }
+      return retry()
     }
     count = 0
     return Promise.resolve()
