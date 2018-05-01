@@ -213,10 +213,10 @@ function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
 
 count = 0
 var ChData = {
+  0: [],
   1: [],
   2: [],
   3: [],
-  4: []
 }
 // Reading the ch data
 var ReadCh = function(ch, callback){
