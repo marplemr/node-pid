@@ -101,18 +101,22 @@ var ChData = {
 }
 // Reading the ch data
 var ReadCh = function(ch, callback){
-  adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
-    if(err){
-      //logging / troubleshooting code goes here...
-      throw err;
-    }
-    // if you made it here, then the data object contains your reading!
-    ChData[ch] = ChData[ch].concat(data) // Putting data into
+  function radc () {
+    adc.readADCSingleEnded(ch, progGainAmp, samplesPerSecond, function(err, data) {
+      if(err){
+        //logging / troubleshooting code goes here...
+        // throw err;
+        setTimeout(radc, 100)
+      }
+      // if you made it here, then the data object contains your reading!
+      ChData[ch] = ChData[ch].concat(data) // Putting data into
 
-    //console.log ('channel  ' + ch + ': ' + data);
-    // Calling the next ch or done
-    callback();
-  });
+      //console.log ('channel  ' + ch + ': ' + data);
+      // Calling the next ch or done
+      callback();
+    });
+  }
+  radc()
 }
 
 // A way to make the reads run one after the other with callbacks
