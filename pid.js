@@ -236,16 +236,16 @@ var Readch2 = function(){ReadCh(2, Readch3)};
 var Readch3 = function(){ReadCh(3, ChDone)};
 var ChDone = function(){
   if (count === '10') {
-    ch1Avg = ChData.0.reduce((a,b) => a + b, 0) / ChData.0.length
-    ch2Avg = ChData.1.reduce((a,b) => a + b, 0) / ChData.1.length
-    ch3Avg = ChData.2.reduce((a,b) => a + b, 0) / ChData.2.length
-    ch4Avg = ChData.3.reduce((a,b) => a + b, 0) / ChData.3.length
+    ch1Avg = ChData[0]reduce((a,b) => a + b, 0) / ChData[0]length
+    ch2Avg = ChData[1]reduce((a,b) => a + b, 0) / ChData[1]length
+    ch3Avg = ChData[2]reduce((a,b) => a + b, 0) / ChData[2]length
+    ch4Avg = ChData[3]reduce((a,b) => a + b, 0) / ChData[3]length
 
     var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
     var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
     var correctionTop  = ctrTop.update(tempTopPlate)
     var correctionBot  = ctrBot.update(tempBotPlate)
-    
+
     console.log('Setpoint: ', setTarget + ' F')
     console.log('Temp Top Plate: ' + tempTopPlate + ' F')
     console.log('Correction: ', correctionTop)
