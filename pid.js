@@ -86,131 +86,6 @@ function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
   }
 }
 
-// function perfectTemp (sampleSize) {
-//   console.log('')
-//   // console.log('heaterTop:', ' ', thermistorTopOn ? 'ON' : 'OFF')
-//   // console.log('heaterBot:', ' ', thermistorBotOn ? 'ON' : 'OFF')
-//   var count = 0
-//   var data = {
-//     ch1: [],
-//     ch2: [],
-//     ch3: [],
-//     ch4: []
-//   }
-//   readAll(sampleSize)
-//     .then(res => {
-//       // done with averaging
-//       var averages = Object.assign({}, data)
-//       ch1Avg = averages.ch1.reduce((a,b) => a + b, 0) / averages.ch1.length
-//       ch2Avg = averages.ch2.reduce((a,b) => a + b, 0) / averages.ch2.length
-//       ch3Avg = averages.ch3.reduce((a,b) => a + b, 0) / averages.ch3.length
-//       ch4Avg = averages.ch4.reduce((a,b) => a + b, 0) / averages.ch4.length
-//
-//       var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
-//       var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
-//       var correctionTop  = ctrTop.update(tempTopPlate)
-//       var correctionBot  = ctrBot.update(tempBotPlate)
-//       console.log('Setpoint: ', setTarget + ' F')
-//       console.log('Temp Top Plate: ' + tempTopPlate + ' F')
-//       console.log('Correction: ', correctionTop)
-//       console.log('------------')
-//       console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
-//       console.log('Correction: ', correctionBot)
-//       console.log('------------')
-//       // applyInputToActuator(input);
-//       data = {}
-//
-//       shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
-//       shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-//       return setTimeout(function() {
-//         perfectTemp(adcSampleSize)
-//       }, interval)
-//
-//     })
-//
-//   function readAll (avgSample) {
-//
-//     function tako () {
-//       adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
-//         if (err) {
-//           //logging / troubleshooting code goes here...
-//           throw err;
-//         }
-//         adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
-//           if (err) {
-//             //logging / troubleshooting code goes here...
-//             throw err;
-//           }
-//           adc.readADCSingleEnded(2, progGainAmp, samplesPerSecond, function(err, dataCh3) {
-//             if (err) {
-//               //logging / troubleshooting code goes here...
-//               throw err;
-//             }
-//             adc.readADCSingleEnded(3, progGainAmp, samplesPerSecond, function(err, dataCh4) {
-//               if (err) {
-//                 //logging / troubleshooting code goes here...
-//                 throw err;
-//               }
-//               // if you made it here, then the data object contains your reading!
-//               var mvCh1 = dataCh1
-//               var mvCh2 = dataCh2
-//               var mvCh3 = dataCh3
-//               var mvCh4 = dataCh4
-//
-//               data.ch1.push(mvCh1)
-//               data.ch2.push(mvCh2)
-//               data.ch3.push(mvCh3)
-//               data.ch4.push(mvCh4)
-//             })
-//           })
-//         })
-//       })
-//     }
-//
-//     if (count - avgSample < 0) {
-//       if (!adc.busy) {
-//         count++
-//         return readAll(avgSample)
-//       }
-//       function retry () {
-//         return setTimeout(function () {
-//           if (!adc.busy) {
-//             count++
-//             return readAll(avgSample)
-//           }
-//           return retry()
-//         }, 5)
-//       }
-//       return retry()
-//     }
-//     count = 0
-//     return Promise.resolve()
-//   }
-// // return averages
-// }
-
-// gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
-//   gpio.read(botPlateGPIO, function(err, valueBot) {
-//     if (err) throw err;
-//     gpio.setup(topPlateGPIO, gpio.DIR_IN, function () {
-//       gpio.read(topPlateGPIO, function(err, valueTop) {
-//         if (err) throw err;
-//         console.log('')
-//         console.log('heater on/off ?');
-//         console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
-//         console.log(valueTop ? 'Top-ON' : 'Top-OFF')
-//         perfectTemp(adcSampleSize)
-//       })
-//     })
-//   })
-// })
-
-
-
-
-
-
-
 count = 0
 var ChData = {
   0: [],
@@ -241,7 +116,7 @@ var Readch2 = function(){ReadCh(2, Readch3)};
 var Readch3 = function(){ReadCh(3, ChDone)};
 var ChDone = function(){
   count++
-  console.log(count)
+  // console.log(count)
   if (count === 10) {
     ch1Avg = ChData[0].reduce((a,b) => a + b, 0) / ChData[0].length
     ch2Avg = ChData[1].reduce((a,b) => a + b, 0) / ChData[1].length
@@ -253,6 +128,8 @@ var ChDone = function(){
     var correctionTop  = ctrTop.update(tempTopPlate)
     var correctionBot  = ctrBot.update(tempBotPlate)
     console.log('')
+    console.log('heater--Top: ', ' ', thermistorTopOn ? 'ON' : 'OFF')
+    console.log('heater--Bot: ', ' ', thermistorBotOn ? 'ON' : 'OFF')
     console.log('Setpoint: ', setTarget.toFixed(2) + ' F')
     console.log('Temp Top Plate: ' + tempTopPlate.toFixed(2) + ' F')
     console.log('Correction: ', correctionTop.toFixed(2))
@@ -268,36 +145,23 @@ var ChDone = function(){
   }
 };
 
-if(!adc.busy)
-{
-
-// Readchall(); // - one Time Read read all 4 ch
-
-// OUTPUT
-// CH1: 0.03 CH2: 0.03 CH3: 0.03 CH4: 4.60
-gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
-  gpio.read(botPlateGPIO, function(err, valueBot) {
-    if (err) throw err;
-    gpio.setup(topPlateGPIO, gpio.DIR_IN, function () {
-      gpio.read(topPlateGPIO, function(err, valueTop) {
-        if (err) throw err;
-        console.log('')
-        console.log('heater on/off ?');
-        console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
-        console.log(valueTop ? 'Top-ON' : 'Top-OFF')
-        var iv = setInterval(Readchall, 100); // Repeat every 500msec
-        // perfectTemp(adcSampleSize)
+if (!adc.busy) {
+  gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
+    gpio.read(botPlateGPIO, function(err, valueBot) {
+      if (err) throw err;
+      gpio.setup(topPlateGPIO, gpio.DIR_IN, function () {
+        gpio.read(topPlateGPIO, function(err, valueTop) {
+          if (err) throw err;
+          console.log('')
+          console.log('heater on/off ?');
+          console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
+          console.log(valueTop ? 'Top-ON' : 'Top-OFF')
+          var iv = setInterval(Readchall, 100); // Repeat every 500msec
+        })
       })
     })
   })
-})
 // 100 (every 100msecs or 10 times a sec) is the max with this program
 // will do with 4 ch being run each time and the Sample rate (On a pi3).
-
-// OUTPUT
-// CH1: 5.15 CH2: 0.03 CH3: 0.03 CH4: 4.60
-// CH1: 5.15 CH2: 0.03 CH3: 0.03 CH4: 4.60
-// CH1: 0.03 CH2: 0.03 CH3: 0.03 CH4: 4.60
-// CH1: 0.03 CH2: 0.03 CH3: 0.03 CH4: 4.60
-
+// WHY IS EACH CHANNEL RAN EACH TIME ??!!??
 }
