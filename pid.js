@@ -128,50 +128,55 @@ function perfectTemp (sampleSize) {
     })
 
   function readAll (avgSample) {
-    adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
-      if (err) {
-        //logging / troubleshooting code goes here...
-        throw err;
-      }
-      adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
+
+    function tako () {
+      adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
         if (err) {
           //logging / troubleshooting code goes here...
           throw err;
         }
-        adc.readADCSingleEnded(2, progGainAmp, samplesPerSecond, function(err, dataCh3) {
+        adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
           if (err) {
             //logging / troubleshooting code goes here...
             throw err;
           }
-          adc.readADCSingleEnded(3, progGainAmp, samplesPerSecond, function(err, dataCh4) {
+          adc.readADCSingleEnded(2, progGainAmp, samplesPerSecond, function(err, dataCh3) {
             if (err) {
               //logging / troubleshooting code goes here...
               throw err;
             }
-            // if you made it here, then the data object contains your reading!
-            var mvCh1 = dataCh1
-            var mvCh2 = dataCh2
-            var mvCh3 = dataCh3
-            var mvCh4 = dataCh4
+            adc.readADCSingleEnded(3, progGainAmp, samplesPerSecond, function(err, dataCh4) {
+              if (err) {
+                //logging / troubleshooting code goes here...
+                throw err;
+              }
+              // if you made it here, then the data object contains your reading!
+              var mvCh1 = dataCh1
+              var mvCh2 = dataCh2
+              var mvCh3 = dataCh3
+              var mvCh4 = dataCh4
 
-            data.ch1.push(mvCh1)
-            data.ch2.push(mvCh2)
-            data.ch3.push(mvCh3)
-            data.ch4.push(mvCh4)
+              data.ch1.push(mvCh1)
+              data.ch2.push(mvCh2)
+              data.ch3.push(mvCh3)
+              data.ch4.push(mvCh4)
+            })
           })
         })
       })
-    })
+    }
+    tako()
+
     if (count - avgSample < 0) {
       if (!adc.busy) {
         count++
-        return readAll(avgSample)
+        tako(avgSample)
       }
       function retry () {
         return setTimeout(function () {
           if (!adc.busy) {
             count++
-            return readAll(avgSample)
+            tako(avgSample)
           }
           return retry()
         }, 5)
