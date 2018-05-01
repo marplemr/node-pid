@@ -165,23 +165,22 @@ function perfectTemp (sampleSize) {
         })
       })
     }
-    tako()
-
     if (count - avgSample < 0) {
       if (!adc.busy) {
         count++
         tako(avgSample)
+      } else {
+        function retry () {
+          return setTimeout(function () {
+            if (!adc.busy) {
+              count++
+              tako(avgSample)
+            }
+            return retry()
+          }, 5)
+        }
+        retry()
       }
-      function retry () {
-        return setTimeout(function () {
-          if (!adc.busy) {
-            count++
-            tako(avgSample)
-          }
-          return retry()
-        }, 5)
-      }
-      return retry()
     }
     count = 0
     return Promise.resolve()
