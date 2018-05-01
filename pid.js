@@ -106,7 +106,7 @@ var ReadCh = function(ch, callback){
       if(err){
         //logging / troubleshooting code goes here...
         // throw err;
-        setTimeout(radc, 100)
+        return setTimeout(radc, 100)
       }
       // if you made it here, then the data object contains your reading!
       ChData[ch] = ChData[ch].concat(data) // Putting data into
