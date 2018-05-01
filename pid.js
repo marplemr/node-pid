@@ -9,7 +9,7 @@ process.on('SIGINT', function() {
           process.exit();
     })
 });
-
+var adcSampleSize = 5
 var chip = 1; //0 for ads1015, 1 for ads1115
 var pidSettings = {
   k_p: 20,
@@ -84,10 +84,8 @@ function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
     }
   }
 }
-// var ChData =[]; //somewhere to store our reading
-// var dev = 127; // used to change Ch data to Voltage
 
-function perfectTemp () {
+function perfectTemp (sampleSize) {
   console.log('')
   // console.log('heaterTop:', ' ', thermistorTopOn ? 'ON' : 'OFF')
   // console.log('heaterBot:', ' ', thermistorBotOn ? 'ON' : 'OFF')
@@ -98,6 +96,37 @@ function perfectTemp () {
     ch3: [],
     ch4: []
   }
+  readall(sampleSize)
+    .then(res => {
+      // done with averaging
+      var averages = Object.assign({}, data)
+      ch1Avg = averages.ch1.reduce((a,b) => a + b, 0) / averages.ch1.length
+      ch2Avg = averages.ch2.reduce((a,b) => a + b, 0) / averages.ch2.length
+      ch3Avg = averages.ch3.reduce((a,b) => a + b, 0) / averages.ch3.length
+      ch4Avg = averages.ch4.reduce((a,b) => a + b, 0) / averages.ch4.length
+
+      var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
+      var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
+      var correctionTop  = ctrTop.update(tempTopPlate)
+      var correctionBot  = ctrBot.update(tempBotPlate)
+      console.log('Setpoint: ', setTarget + ' F')
+      console.log('Temp Top Plate: ' + tempTopPlate + ' F')
+      console.log('Correction: ', correctionTop)
+      console.log('------------')
+      console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
+      console.log('Correction: ', correctionBot)
+      console.log('------------')
+      // applyInputToActuator(input);
+      data = {}
+
+      shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
+      shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
+      return setTimeout(function() {
+        perfectTemp(adcSampleSize)
+      }, interval)
+
+    })
+
   function readAll (avgSample) {
     adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
       if (err) {
@@ -120,7 +149,7 @@ function perfectTemp () {
               throw err;
             }
             // if you made it here, then the data object contains your reading!
-            var mvCh1 = dataCh1 // Putting data into
+            var mvCh1 = dataCh1
             var mvCh2 = dataCh2
             var mvCh3 = dataCh3
             var mvCh4 = dataCh4
@@ -129,24 +158,6 @@ function perfectTemp () {
             data.ch2.push(mvCh2)
             data.ch3.push(mvCh3)
             data.ch4.push(mvCh4)
-            // var tempBotPlate = mvToC(mvCh1, mvCh2, 221, 1.4).temp
-            // var tempTopPlate = mvToC(mvCh3, mvCh4, 235, 19).temp
-            // var correctionTop  = ctrTop.update(tempTopPlate)
-            // var correctionBot  = ctrBot.update(tempBotPlate)
-            // console.log('Setpoint: ', setTarget + ' F')
-            // console.log('Temp Top Plate: ' + tempTopPlate + ' F')
-            // console.log('Correction: ', correctionTop)
-            // console.log('------------')
-            // console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
-            // console.log('Correction: ', correctionBot)
-            // console.log('------------')
-            // applyInputToActuator(input);
-
-            // shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
-            // shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-            // return setTimeout(function() {
-            //   perfectTemp()
-            // }, interval)
           })
         })
       })
@@ -155,36 +166,8 @@ function perfectTemp () {
       return readAll(5)
     }
     count = 0
-    return
+    return Promise.resolve()
   }
-
-// done with averaging
-var averages = Object.assign({}, data)
-data = {}
-ch1Avg = averages.ch1.reduce((a,b) => a + b, 0) / averages.ch1.length
-ch2Avg = averages.ch2.reduce((a,b) => a + b, 0) / averages.ch2.length
-ch3Avg = averages.ch3.reduce((a,b) => a + b, 0) / averages.ch3.length
-ch4Avg = averages.ch4.reduce((a,b) => a + b, 0) / averages.ch4.length
-
-var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
-var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
-var correctionTop  = ctrTop.update(tempTopPlate)
-var correctionBot  = ctrBot.update(tempBotPlate)
-console.log('Setpoint: ', setTarget + ' F')
-console.log('Temp Top Plate: ' + tempTopPlate + ' F')
-console.log('Correction: ', correctionTop)
-console.log('------------')
-console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
-console.log('Correction: ', correctionBot)
-console.log('------------')
-applyInputToActuator(input);
-
-shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
-shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-return setTimeout(function() {
-  perfectTemp()
-}, interval)
-
 // return averages
 }
 
@@ -198,7 +181,7 @@ gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
         console.log('heater on/off ?');
         console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
         console.log(valueTop ? 'Top-ON' : 'Top-OFF')
-        perfectTemp()
+        perfectTemp(adcSampleSize)
       })
     })
   })
