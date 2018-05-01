@@ -1,6 +1,7 @@
 var Controller = require('node-pid-controller');
 var ads1x15 = require('node-ads1x15');
 var gpio = require('rpi-gpio');
+
 process.on('SIGINT', function() {
   console.log("Caught interrupt signal");
   console.log("closing all gpios");
@@ -8,33 +9,32 @@ process.on('SIGINT', function() {
           process.exit();
     })
 });
+
 var chip = 1; //0 for ads1015, 1 for ads1115
-var ctrTop = new Controller({
-  k_p: 0.01,
+var pidSettings = {
+  k_p: 20,
   k_i: 0.01,
-  k_d: 0.01,
+  k_d: 16,
   dt: 1
-})
-var ctrBot = new Controller({
-  k_p: 0.01,
-  k_i: 0.01,
-  k_d: 0.01,
-  dt: 1
-})
+}
+var ctrTop = new Controller(pidSettings)
+var ctrBot = new Controller(pidSettings)
 var setTarget = 180
-var interval = 500
+var interval = 1000
 var botPlateGPIO = 18
 var topPlateGPIO = 22
 var thermistorBotOn
 var thermistorTopOn
-ctrTop.setTarget(setTarget)
-ctrBot.setTarget(setTarget)
-
 //Simple usage (default ADS address on pi 2b or 3):
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
 var samplesPerSecond = '250'; // see index.js for allowed values for your chip
 var progGainAmp = '512'; // see index.js for allowed values for your chip
+var goalReachedBot = false
+var goalReachedTop = false
+
+ctrTop.setTarget(setTarget)
+ctrBot.setTarget(setTarget)
 
 function mvToC (mVCh1, mVCh2, ohmRef, offset) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
@@ -44,100 +44,148 @@ function mvToC (mVCh1, mVCh2, ohmRef, offset) {
   var far = celsius * (9 / 5) + 32
   return {temp: far, res: thermistorOhms}
 }
+
+function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
+  var goalReached = plate === 'top' ? goalReachedTop : goalReachedBot
+
+  if (goalReached) {
+    console.log('perfectTemp!')
+  }
+
+  if (correction > 0) {
+    if (!thermistorOn) {
+      return gpio.setup(gpioNum, gpio.DIR_OUT, function () {
+        gpio.write(gpioNum, false, function(err) {
+          if (err) throw err;
+          if (plate === 'top') {
+            thermistorTopOn = true
+          } else {
+            thermistorBotOn = true
+          }
+          console.log('---- heater-' + plate + 'SWITCHED-ON! ----')
+        })
+      })
+    }
+  }
+
+  if (correction < 0) {
+    if (thermistorOn) {
+      return gpio.setup(gpioNum, gpio.DIR_OUT, function () {
+        gpio.write(gpioNum, true, function(err) {
+          if (err) throw err;
+          console.log('---- heater-' + plate + 'SWITCHED-OFF! ----')
+          if (plate === 'top') {
+            thermistorTopOn = false
+          } else {
+            thermistorBotOn = false
+          }
+        })
+      })
+    }
+  }
+}
 // var ChData =[]; //somewhere to store our reading
 // var dev = 127; // used to change Ch data to Voltage
-var goalReachedBot = false
-var goalReachedTop = false
+
 function perfectTemp () {
   console.log('')
-  console.log('heaterTop:', ' ', thermistorTopOn ? 'ON' : 'OFF')
-  console.log('heaterBot:', ' ', thermistorBotOn ? 'ON' : 'OFF')
-  adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
-    if (err) {
-      //logging / troubleshooting code goes here...
-      throw err;
-    }
-    adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
+  // console.log('heaterTop:', ' ', thermistorTopOn ? 'ON' : 'OFF')
+  // console.log('heaterBot:', ' ', thermistorBotOn ? 'ON' : 'OFF')
+  var count = 0
+  var data = {
+    ch1: [],
+    ch2: [],
+    ch3: [],
+    ch4: []
+  }
+  function readAll (avgSample) {
+    adc.readADCSingleEnded(channel, progGainAmp, samplesPerSecond, function(err, dataCh1) {
       if (err) {
         //logging / troubleshooting code goes here...
         throw err;
       }
-      adc.readADCSingleEnded(2, progGainAmp, samplesPerSecond, function(err, dataCh3) {
+      adc.readADCSingleEnded(1, progGainAmp, samplesPerSecond, function(err, dataCh2) {
         if (err) {
           //logging / troubleshooting code goes here...
           throw err;
         }
-        adc.readADCSingleEnded(3, progGainAmp, samplesPerSecond, function(err, dataCh4) {
+        adc.readADCSingleEnded(2, progGainAmp, samplesPerSecond, function(err, dataCh3) {
           if (err) {
             //logging / troubleshooting code goes here...
             throw err;
           }
-          // if you made it here, then the data object contains your reading!
-          var mvCh1 = dataCh1 // Putting data into
-          var mvCh2 = dataCh2
-          var mvCh3 = dataCh3
-          var mvCh4 = dataCh4
-          var tempBotPlate = mvToC(mvCh1, mvCh2, 221, 1.4).temp
-          var tempTopPlate = mvToC(mvCh3, mvCh4, 235, 13.4).temp
-          var correctionTop  = ctrTop.update(tempTopPlate)
-          var correctionBot  = ctrBot.update(tempBotPlate)
-          console.log('Setpoint: ', setTarget + ' F')
-          console.log('Temp Top Plate: ' + tempTopPlate + ' F')
-          console.log('Correction: ', correctionTop)
-          console.log('------------')
-          console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
-          console.log('Correction: ', correctionBot)
-          console.log('------------')
-          // applyInputToActuator(input);
-          function shouldISwitch (plate, gpioNum, correction, thermistorOn) {
-            var goalReached = plate === 'top' ? goalReachedTop : goalReachedBot
-
-            if (goalReached) {
-              console.log('perfectTemp!')
+          adc.readADCSingleEnded(3, progGainAmp, samplesPerSecond, function(err, dataCh4) {
+            if (err) {
+              //logging / troubleshooting code goes here...
+              throw err;
             }
+            // if you made it here, then the data object contains your reading!
+            var mvCh1 = dataCh1 // Putting data into
+            var mvCh2 = dataCh2
+            var mvCh3 = dataCh3
+            var mvCh4 = dataCh4
 
-            if (correction > 0) {
-              if (!thermistorOn) {
-                return gpio.setup(gpioNum, gpio.DIR_OUT, function () {
-                  gpio.write(gpioNum, false, function(err) {
-                    if (err) throw err;
-                    if (plate === 'top') {
-                      thermistorTopOn = true
-                    } else {
-                      thermistorBotOn = true
-                    }
-                    console.log('---- heater-' + plate + 'SWITCHED-ON! ----')
-                  })
-                })
-              }
-            }
+            data.ch1.push(mvCh1)
+            data.ch2.push(mvCh2)
+            data.ch3.push(mvCh3)
+            data.ch4.push(mvCh4)
+            // var tempBotPlate = mvToC(mvCh1, mvCh2, 221, 1.4).temp
+            // var tempTopPlate = mvToC(mvCh3, mvCh4, 235, 19).temp
+            // var correctionTop  = ctrTop.update(tempTopPlate)
+            // var correctionBot  = ctrBot.update(tempBotPlate)
+            // console.log('Setpoint: ', setTarget + ' F')
+            // console.log('Temp Top Plate: ' + tempTopPlate + ' F')
+            // console.log('Correction: ', correctionTop)
+            // console.log('------------')
+            // console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
+            // console.log('Correction: ', correctionBot)
+            // console.log('------------')
+            // applyInputToActuator(input);
 
-            if (correction < 0) {
-              if (thermistorOn) {
-                return gpio.setup(gpioNum, gpio.DIR_OUT, function () {
-                  gpio.write(gpioNum, true, function(err) {
-                    if (err) throw err;
-                    console.log('---- heater-' + plate + 'SWITCHED-OFF! ----')
-                    if (plate === 'top') {
-                      thermistorTopOn = false
-                    } else {
-                      thermistorBotOn = false
-                    }
-                  })
-                })
-              }
-            }
-          }
-
-          shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
-          shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
-          return setTimeout(function() {
-            perfectTemp()
-          }, interval)
+            // shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
+            // shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
+            // return setTimeout(function() {
+            //   perfectTemp()
+            // }, interval)
+          })
         })
       })
     })
-  })
+    if (count - avgSample < 0) {
+      return readAll(5)
+    }
+    count = 0
+    return
+  }
+
+// done with averaging
+var averages = Object.assign({}, data)
+data = {}
+ch1Avg = averages.ch1.reduce((a,b) => a + b, 0) / averages.ch1.length
+ch2Avg = averages.ch2.reduce((a,b) => a + b, 0) / averages.ch2.length
+ch3Avg = averages.ch3.reduce((a,b) => a + b, 0) / averages.ch3.length
+ch4Avg = averages.ch4.reduce((a,b) => a + b, 0) / averages.ch4.length
+
+var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
+var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
+var correctionTop  = ctrTop.update(tempTopPlate)
+var correctionBot  = ctrBot.update(tempBotPlate)
+console.log('Setpoint: ', setTarget + ' F')
+console.log('Temp Top Plate: ' + tempTopPlate + ' F')
+console.log('Correction: ', correctionTop)
+console.log('------------')
+console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
+console.log('Correction: ', correctionBot)
+console.log('------------')
+applyInputToActuator(input);
+
+shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
+shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
+return setTimeout(function() {
+  perfectTemp()
+}, interval)
+
+// return averages
 }
 
 gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
@@ -150,9 +198,7 @@ gpio.setup(botPlateGPIO, gpio.DIR_IN, function () {
         console.log('heater on/off ?');
         console.log(valueBot ? 'Bottom-ON' : 'Bottom-OFF')
         console.log(valueTop ? 'Top-ON' : 'Top-OFF')
-        return setTimeout(function() {
-          perfectTemp()
-        }, interval)
+        perfectTemp()
       })
     })
   })
