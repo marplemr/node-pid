@@ -251,7 +251,7 @@ var ChDone = function(){
     var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
     var correctionTop  = ctrTop.update(tempTopPlate)
     var correctionBot  = ctrBot.update(tempBotPlate)
-
+    console.log('')
     console.log('Setpoint: ', setTarget + ' F')
     console.log('Temp Top Plate: ' + tempTopPlate + ' F')
     console.log('Correction: ', correctionTop)
@@ -259,7 +259,7 @@ var ChDone = function(){
     console.log('Temp Bottom Plate: ' + tempBotPlate + ' F')
     console.log('Correction: ', correctionBot)
     console.log('------------')
-
+    console.log('')
     shouldISwitch('bottom', botPlateGPIO, correctionBot, thermistorBotOn)
     shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
 
