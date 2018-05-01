@@ -240,7 +240,8 @@ var Readch1 = function(){ReadCh(1, Readch2)};
 var Readch2 = function(){ReadCh(2, Readch3)};
 var Readch3 = function(){ReadCh(3, ChDone)};
 var ChDone = function(){
-  if (count === '10') {
+  count++
+  if (count === 10) {
     ch1Avg = ChData[0].reduce((a,b) => a + b, 0) / ChData[0].length
     ch2Avg = ChData[1].reduce((a,b) => a + b, 0) / ChData[1].length
     ch3Avg = ChData[2].reduce((a,b) => a + b, 0) / ChData[2].length
@@ -263,9 +264,7 @@ var ChDone = function(){
     shouldISwitch('top', topPlateGPIO, correctionTop, thermistorTopOn)
 
     count = 0
-    return
   }
-  count++
 // This is run after the 4 ch have been read
 // console.log ('CH1: ' + (ChData[0]/dev).toFixed(2) +
 // '\tCH2: ' + (ChData[1]/dev).toFixed(2) +
