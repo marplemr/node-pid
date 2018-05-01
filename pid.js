@@ -14,7 +14,7 @@ var chip = 1; //0 for ads1015, 1 for ads1115
 var pidSettings = {
   k_p: 20,
   k_i: 0.01,
-  k_d: 16,
+  k_d: 20,
   dt: 1
 }
 var ctrTop = new Controller(pidSettings)
