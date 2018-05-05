@@ -38,11 +38,8 @@ var GAIN = 4096 / Number(progGainAmp)
 ctrTop.setTarget(setTarget)
 ctrBot.setTarget(setTarget)
 
-function mvToCNTC (mVCh1, ohmRef, offset) {
-  // var thermistorOhms = 3300/(mV/1000) - 1000
-  // var thermistorOhms = ohmRef * (1 / (mVCh1 - 1)) - offset
-  var adcVolts = mVCh1 * (1 / 32767) * (4.096 / GAIN)
-  var thermistorOhms = ohmRef / (adcVolts - 1) // 10kOhms reference
+function mvToCNTC (milliVolts, ohmRef, offset) {
+  var thermistorOhms = ohmRef / (milliVolts / 1000 - 1) // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
   var TEMPERATURENOMINAL = 25 // temperature where nominal resistance is measured (almost always 25C)
@@ -133,7 +130,7 @@ var ReadCh = function(ch, callback){
         return setTimeout(radc, 100)
       }
       // if you made it here, then the data object contains your reading!
-      ChData[ch] = ChData[ch].concat(data) // Putting data into
+      ChData[ch] = ChData[ch].concat(data) // data is already in mV thanks to npm bruh
 
       //console.log ('channel  ' + ch + ': ' + data);
       // Calling the next ch or done
