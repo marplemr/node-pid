@@ -44,7 +44,7 @@ function mvToCNTC (mVCh1, ohmRef, offset) {
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
   var TEMPERATURENOMINAL = 25 // temperature where nominal resistance is measured (almost always 25C)
-  var steinhart = ohmRef / R0;                  // (R/Ro)
+  var steinhart = thermistorOhms / R0;                  // (R/Ro)
   steinhart = Math.log(steinhart);                  // ln(R/Ro)
   steinhart /= BCOEFFICIENT;                   // 1/B * ln(R/Ro)
   steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
