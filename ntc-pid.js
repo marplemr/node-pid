@@ -30,7 +30,7 @@ var thermistorTopOn
 var adc = new ads1x15(chip);
 var channel = 0; //channel 0, 1, 2, or 3...
 var samplesPerSecond = '250'; // see index.js for allowed values for your chip
-var progGainAmp = '512'; // see index.js for allowed values for your chip
+var progGainAmp = '4096'; // see index.js for allowed values for your chip
 var goalReachedBot = false
 var goalReachedTop = false
 
@@ -51,7 +51,7 @@ function mvToCNTC (mVCh1, ohmRef, offset) {
   steinhart = 1.0 / steinhart;                 // Invert
   steinhart -= 273.15;                         // convert to C
 
-
+  console.log('milliVolts NTC ::: ', mvCh1)
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   // var celsius = (thermistorOhms / 100 - 1) / 0.00385
   var far = steinhart * (9 / 5) + 32
