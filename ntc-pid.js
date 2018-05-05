@@ -33,6 +33,7 @@ var samplesPerSecond = '250'; // see index.js for allowed values for your chip
 var progGainAmp = '4096'; // see index.js for allowed values for your chip
 var goalReachedBot = false
 var goalReachedTop = false
+var GAIN = 4096 / Number(progGainAmp)
 
 ctrTop.setTarget(setTarget)
 ctrBot.setTarget(setTarget)
@@ -40,7 +41,7 @@ ctrBot.setTarget(setTarget)
 function mvToCNTC (mVCh1, ohmRef, offset) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
   // var thermistorOhms = ohmRef * (1 / (mVCh1 - 1)) - offset
-  var adcVolts = (1 / 32767) * (4.096 / progGainAmp)
+  var adcVolts = (1 / 32767) * (4.096 / GAIN)
   var thermistorOhms = ohmRef / (adcVolts - 1) // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
@@ -53,6 +54,7 @@ function mvToCNTC (mVCh1, ohmRef, offset) {
   steinhart -= 273.15;                         // convert to C
 
   console.log('milliVolts NTC ::: ', mVCh1)
+  console.log('ohms NTC ::: ', thermistorOhms)
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   // var celsius = (thermistorOhms / 100 - 1) / 0.00385
   var far = steinhart * (9 / 5) + 32
