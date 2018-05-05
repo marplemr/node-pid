@@ -41,7 +41,7 @@ ctrBot.setTarget(setTarget)
 function mvToCNTC (mVCh1, ohmRef, offset) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
   // var thermistorOhms = ohmRef * (1 / (mVCh1 - 1)) - offset
-  var adcVolts = (1 / 32767) * (4.096 / GAIN)
+  var adcVolts = mVCh1 * (1 / 32767) * (4.096 / GAIN)
   var thermistorOhms = ohmRef / (adcVolts - 1) // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
