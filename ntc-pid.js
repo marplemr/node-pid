@@ -37,10 +37,10 @@ var goalReachedTop = false
 ctrTop.setTarget(setTarget)
 ctrBot.setTarget(setTarget)
 
-function mvToC (mVCh1, offset) {
+function mvToCNTC (mVCh1, ohmRef, offset) {
   // var thermistorOhms = 3300/(mV/1000) - 1000
   // var thermistorOhms = ohmRef * (1 / (mVCh1 - 1)) - offset
-  var thermistorOhms = ohmRef / (mVCh1 - 1)
+  var thermistorOhms = ohmRef / (mVCh1 - 1) // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
   var TEMPERATURENOMINAL = 25 // temperature where nominal resistance is measured (almost always 25C)
@@ -55,6 +55,15 @@ function mvToC (mVCh1, offset) {
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   // var celsius = (thermistorOhms / 100 - 1) / 0.00385
   var far = steinhart * (9 / 5) + 32
+  return {temp: far, res: thermistorOhms}
+}
+
+function mvToC (mVCh1, mVCh2, ohmRef, offset) {
+  // var thermistorOhms = 3300/(mV/1000) - 1000
+  var thermistorOhms = ohmRef * (1 / ((mVCh1 / mVCh2) - 1)) - offset
+  // var celsius = (thermistorOhms/604 - 1)/0.00518
+  var celsius = (thermistorOhms / 100 - 1) / 0.00385
+  var far = celsius * (9 / 5) + 32
   return {temp: far, res: thermistorOhms}
 }
 
@@ -147,7 +156,7 @@ var ChDone = function(){
 
     var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
     // var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
-    var tempTopPlate = mvToC(ch4Avg).temp
+    var tempTopPlate = mvToCNTC(ch4Avg, 10000).temp
     // var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
     var correctionTop  = ctrTop.update(tempTopPlate)
     var correctionBot  = ctrBot.update(tempBotPlate)
