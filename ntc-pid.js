@@ -50,7 +50,7 @@ function mvToCNTC (milliVolts, ohmRef, offset) {
   steinhart = 1.0 / steinhart;                 // Invert
   steinhart -= 273.15;                         // convert to C
 
-  console.log('milliVolts NTC ::: ', adcVolts)
+  console.log('milliVolts NTC ::: ', milliVolts)
   console.log('ohms NTC ::: ', thermistorOhms)
   // var celsius = (thermistorOhms/604 - 1)/0.00518
   // var celsius = (thermistorOhms / 100 - 1) / 0.00385
