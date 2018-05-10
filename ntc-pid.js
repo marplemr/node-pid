@@ -12,15 +12,16 @@ process.on('SIGINT', function() {
 var adcSampleSize = 5
 var chip = 1; //0 for ads1015, 1 for ads1115
 var pidSettings = {
-  k_p: 20,
+  k_p: 30,
   k_i: 0.01,
-  k_d: 20,
+  k_d: 25,
   dt: 1
 }
 var ctrTop = new Controller(pidSettings)
 var ctrBot = new Controller(pidSettings)
 var sampleRate = 100
-var setTarget = 180
+var setTargetTop = 180
+var setTargetBot = 205
 var interval = 1000
 var botPlateGPIO = 18
 var topPlateGPIO = 22
@@ -35,20 +36,20 @@ var goalReachedBot = false
 var goalReachedTop = false
 var GAIN = 4096 / Number(progGainAmp)
 
-ctrTop.setTarget(setTarget)
-ctrBot.setTarget(setTarget)
+ctrTop.setTarget(setTargetTop)
+ctrBot.setTarget(setTargetBot)
 
 function mvToCNTC (milliVolts, ohmRef, offset) {
-  var thermistorOhms = ohmRef * (1 / (milliVolts / 1000 - 1)) // 10kOhms reference
+  var thermistorOhms = (( 3.3 * ohmRef) - (milliVolts  * ohmRef)) / milliVolts // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
   var TEMPERATURENOMINAL = 25 // temperature where nominal resistance is measured (almost always 25C)
   var steinhart = thermistorOhms / R0;                  // (R/Ro)
   steinhart = Math.log(steinhart);                  // ln(R/Ro)
-  steinhart /= BCOEFFICIENT;                   // 1/B * ln(R/Ro)
-  steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
+  steinhart = steinhart / BCOEFFICIENT;                   // 1/B * ln(R/Ro)
+  steinhart = steinhart + 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
   steinhart = 1.0 / steinhart;                 // Invert
-  steinhart -= 273.15;                         // convert to C
+  steinhart = steinhart - 273.15;                         // convert to C
 
   console.log('milliVolts NTC ::: ', milliVolts)
   console.log('ohms NTC ::: ', thermistorOhms)
