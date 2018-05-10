@@ -20,8 +20,8 @@ var pidSettings = {
 var ctrTop = new Controller(pidSettings)
 var ctrBot = new Controller(pidSettings)
 var sampleRate = 100
-var setTargetTop = 180
-var setTargetBot = 205
+var setTargetTop = 190
+var setTargetBot = 190
 var interval = 1000
 var botPlateGPIO = 18
 var topPlateGPIO = 22
@@ -156,8 +156,9 @@ var ChDone = function(){
     ch3Avg = ChData[2].reduce((a,b) => a + b, 0) / ChData[2].length
     ch4Avg = ChData[3].reduce((a,b) => a + b, 0) / ChData[3].length
 
-    var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
     // var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
+    // var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
+    var tempBotPlate = mvToCNTC(ch3Avg, 10000).temp
     var tempTopPlate = mvToCNTC(ch4Avg, 10000).temp
     // var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
     var correctionTop  = ctrTop.update(tempTopPlate)
