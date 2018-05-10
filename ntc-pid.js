@@ -40,7 +40,8 @@ ctrTop.setTarget(setTargetTop)
 ctrBot.setTarget(setTargetBot)
 
 function mvToCNTC (milliVolts, ohmRef, offset) {
-  var thermistorOhms = (( 3.3 * ohmRef) - (milliVolts  * ohmRef)) / milliVolts // 10kOhms reference
+  volts = milliVolts / 1000
+  var thermistorOhms = (( 3.3 * ohmRef) - (volts  * ohmRef)) / volts // 10kOhms reference
   var R0 = 10000 // 10kOhms
   var BCOEFFICIENT = 3380 // 3380K
   var TEMPERATURENOMINAL = 25 // temperature where nominal resistance is measured (almost always 25C)
