@@ -158,8 +158,8 @@ var ChDone = function(){
 
     // var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
     // var tempBotPlate = mvToC(ch1Avg, ch2Avg, 221, 1.4).temp
-    var tempBotPlate = mvToCNTC(ch3Avg, 10000).temp
-    var tempTopPlate = mvToCNTC(ch4Avg, 10000).temp
+    var tempBotPlate = mvToCNTC(ch4Avg, 10000).temp
+    var tempTopPlate = mvToCNTC(ch3Avg, 10000).temp
     // var tempTopPlate = mvToC(ch3Avg, ch4Avg, 235, 19).temp
     var correctionTop  = ctrTop.update(tempTopPlate)
     var correctionBot  = ctrBot.update(tempBotPlate)
